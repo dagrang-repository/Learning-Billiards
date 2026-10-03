@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#0c1612"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<title>Felt</title>
+<style>
+:root {
+  --bg:#0c1612; --fg:#e8eadf; --muted:#8a958c; --line:rgba(232,234,223,.16); --surface:#15241c;
+}
+html[data-theme="light"] {
+  --bg:#efe8d8; --fg:#142018; --muted:#5c6b60; --line:rgba(20,32,24,.14); --surface:#e4dcc8;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{
+  width:100%;min-height:100%;overflow-x:hidden;overflow-y:scroll;
+  background:var(--bg);color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+body{padding:0 0 32px;background:var(--bg);color:var(--fg)}
+.brand{
+  position:sticky;top:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;background:var(--bg);
+  font-size:15px;font-weight:650;letter-spacing:-.03em
+}
+.tools{display:flex;align-items:center;gap:8px}
+.install,.theme{
+  border:0;background:var(--surface);color:inherit;font:inherit;font-size:14px;font-weight:600;
+  min-height:36px;padding:0 12px
+}
+.how,.pop{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+  background:var(--bg);color:var(--fg);
+}
+.how{z-index:20}
+.how[hidden],.pop[hidden]{display:none}
+nav{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(9.75rem,1fr));
+}
+.row{
+  display:flex;align-items:center;gap:8px;
+  width:100%;min-width:0;min-height:52px;padding:0 10px;
+  border:0;border-top:1px solid var(--line);
+  background:none;color:inherit;font:inherit;font-size:15px;font-weight:500;text-align:left;
+}
+.lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row:active{background:color-mix(in oklab, var(--fg) 6%, transparent)}
+.emo{font-size:20px;line-height:1;width:1.5em;text-align:center}
+.ph{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;
+  min-height:48px;flex:none;
+}
+.x,.yt,.del,.restore{
+  border:0;background:transparent;color:inherit;font:inherit;font-size:15px;font-weight:600;
+  min-height:44px;padding:0 4px;display:inline-flex;align-items:center;text-decoration:none;
+}
+button.x{
+  min-width:48px;font-size:22px;font-weight:800;letter-spacing:0;
+}
+.del{color:var(--muted);justify-self:end}
+.restore{background:var(--surface);min-height:36px;padding:0 12px;font-size:14px}
+.restore[hidden]{display:none}
+.ph{grid-template-columns:auto 1fr auto auto}
+.pt{font-size:15px;font-weight:650;letter-spacing:-.03em;text-align:center}
+.fill{
+  flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;
+  padding:4px 0 12px;
+}
+.fill p{
+  font-size:clamp(15px,3.9vw,18px);line-height:1.45;
+  padding:12px 0;
+  border-top:1px solid var(--line);
+}
+.fill p:first-child{border-top:0;padding-top:8px}
+.fill em{
+  display:block;font-style:normal;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;font-weight:650;color:var(--muted);margin-bottom:6px;
+}
+@media (min-width:640px){
+  .fill{column-count:2;column-gap:28px}
+  .fill p{break-inside:avoid}
+}
+body.lock{overflow:hidden}
+</style>
+</head>
+<body>
+<div class="brand">
+  <span>Felt · 69</span>
+  <div class="tools">
+    <select class="theme" id="theme" aria-label="Theme">
+      <option value="dark">Felt</option>
+      <option value="light">Day</option>
+      <option value="auto">Auto</option>
+    </select>
+    <button type="button" class="restore" id="restore-btn" hidden>Restore menu</button>
+    <button type="button" class="install" id="install-btn">Install App</button>
+  </div>
+</div>
+<section class="how" id="how-install" hidden>
+  <header class="ph">
+    <button type="button" class="x" id="how-close">X</button>
+    <p class="pt">Install App</p>
+    <span></span>
+  </header>
+  <div class="fill">
+    <p><em>Why</em>Put Felt on the home screen so the menu stands on the rail with you. No browser chrome. Theme stays whatever you picked.</p>
+    <p><em>iPhone</em>Share, then Add to Home Screen. Open the icon when you practice, not the Safari tab.</p>
+    <p><em>Android</em>Tap Install App. If the phone stays quiet, browser menu → Add to Home screen.</p>
+    <p><em>Files</em>Keep index.html, manifest.webmanifest, sw.js, icon-192.png and icon-512.png in one folder. Install needs a real page address, not a raw file open.</p>
+  </div>
+</section>
+<nav>
+<button type="button" class="row" data-open="bank"><span class="emo">↩️</span><span class="lab">The Bank</span></button><button type="button" class="row" data-open="kick"><span class="emo">🪃</span><span class="lab">The Kick</span></button><button type="button" class="row" data-open="kick2"><span class="emo">2️⃣</span><span class="lab">Two-rail kick</span></button><button type="button" class="row" data-open="kick3"><span class="emo">3️⃣</span><span class="lab">Three-rail kick</span></button><button type="button" class="row" data-open="kick8"><span class="emo">🎱</span><span class="lab">Kick to the 8</span></button><button type="button" class="row" data-open="banksid"><span class="emo">↔️</span><span class="lab">Bank to the side</span></button><button type="button" class="row" data-open="xcorn"><span class="emo">↘️</span><span class="lab">Cross-corner bank</span></button><button type="button" class="row" data-open="shortb"><span class="emo">📐</span><span class="lab">Short rail bank</span></button><button type="button" class="row" data-open="longb"><span class="emo">📏</span><span class="lab">Long rail bank</span></button><button type="button" class="row" data-open="stop"><span class="emo">✋</span><span class="lab">Stop shot</span></button><button type="button" class="row" data-open="follow"><span class="emo">➡️</span><span class="lab">Follow</span></button><button type="button" class="row" data-open="draw"><span class="emo">⬅️</span><span class="lab">Draw</span></button><button type="button" class="row" data-open="kitchen"><span class="emo">🏠</span><span class="lab">Draw to kitchen</span></button><button type="button" class="row" data-open="stun"><span class="emo">⚡</span><span class="lab">Stun</span></button><button type="button" class="row" data-open="force"><span class="emo">⏩</span><span class="lab">Force follow</span></button><button type="button" class="row" data-open="center"><span class="emo">🎯</span><span class="lab">Center-table leave</span></button><button type="button" class="row" data-open="thin"><span class="emo">🔪</span><span class="lab">Thin cut</span></button><button type="button" class="row" data-open="frozen"><span class="emo">🧊</span><span class="lab">Frozen ball</span></button><button type="button" class="row" data-open="rail1"><span class="emo">🪵</span><span class="lab">Rail-first</span></button><button type="button" class="row" data-open="dead"><span class="emo">💀</span><span class="lab">Dead-ball hit</span></button><button type="button" class="row" data-open="combo"><span class="emo">🔗</span><span class="lab">Combination</span></button><button type="button" class="row" data-open="carom"><span class="emo">💥</span><span class="lab">Carom</span></button><button type="button" class="row" data-open="billiard"><span class="emo">⚪</span><span class="lab">Billiard</span></button><button type="button" class="row" data-open="safety"><span class="emo">🛡️</span><span class="lab">Safety</span></button><button type="button" class="row" data-open="push"><span class="emo">📤</span><span class="lab">Push-out</span></button><button type="button" class="row" data-open="jump"><span class="emo">🦘</span><span class="lab">Jump</span></button><button type="button" class="row" data-open="masse"><span class="emo">🌙</span><span class="lab">Masse</span></button><button type="button" class="row" data-open="three"><span class="emo">🔢</span><span class="lab">3-ball run</span></button><button type="button" class="row" data-open="leave"><span class="emo">⚖️</span><span class="lab">Wrong / right leave</span></button><button type="button" class="row" data-open="one9"><span class="emo">9️⃣</span><span class="lab">1–9 in order</span></button><button type="button" class="row" data-open="last5"><span class="emo">5️⃣</span><span class="lab">8-ball last-five</span></button><button type="button" class="row" data-open="solids"><span class="emo">🟠</span><span class="lab">Clear solids</span></button><button type="button" class="row" data-open="stripes"><span class="emo">🔵</span><span class="lab">Clear stripes</span></button><button type="button" class="row" data-open="rwalk"><span class="emo">🚶</span><span class="lab">Rail walking</span></button><button type="button" class="row" data-open="line5"><span class="emo">➖</span><span class="lab">Line of 5</span></button><button type="button" class="row" data-open="ladder"><span class="emo">📶</span><span class="lab">Stop-shot ladder</span></button><button type="button" class="row" data-open="diamond"><span class="emo">💎</span><span class="lab">Diamond system</span></button><button type="button" class="row" data-open="plus"><span class="emo">➕</span><span class="lab">Plus system</span></button><button type="button" class="row" data-open="mirror"><span class="emo">🪞</span><span class="lab">Mirror system</span></button><button type="button" class="row" data-open="b8"><span class="emo">🟢</span><span class="lab">8-ball break</span></button><button type="button" class="row" data-open="scratch8"><span class="emo">❌</span><span class="lab">8-ball scratch</span></button><button type="button" class="row" data-open="b9"><span class="emo">🔶</span><span class="lab">9-ball break</span></button><button type="button" class="row" data-open="snap"><span class="emo">✨</span><span class="lab">9 on the snap</span></button><button type="button" class="row" data-open="legal"><span class="emo">✅</span><span class="lab">Legal first hit</span></button>
+<button type="button" class="row" data-open="runeng"><span class="emo">🌀</span><span class="lab">Running english</span></button><button type="button" class="row" data-open="holdup"><span class="emo">🛑</span><span class="lab">Hold-up english</span></button><button type="button" class="row" data-open="inside"><span class="emo">↪️</span><span class="lab">Inside english</span></button><button type="button" class="row" data-open="outside"><span class="emo">↩️</span><span class="lab">Outside english</span></button><button type="button" class="row" data-open="throw"><span class="emo">🧲</span><span class="lab">Throw</span></button><button type="button" class="row" data-open="half"><span class="emo">◐</span><span class="lab">Half-ball hit</span></button><button type="button" class="row" data-open="straight"><span class="emo">⬆️</span><span class="lab">Straight-in</span></button><button type="button" class="row" data-open="pocketspd"><span class="emo">🐢</span><span class="lab">Pocket speed</span></button><button type="button" class="row" data-open="cluster"><span class="emo">🧱</span><span class="lab">Open a cluster</span></button><button type="button" class="row" data-open="twoway"><span class="emo">🔀</span><span class="lab">Two-way shot</span></button><button type="button" class="row" data-open="hook"><span class="emo">🙈</span><span class="lab">Hook</span></button><button type="button" class="row" data-open="bih"><span class="emo">🖐️</span><span class="lab">Ball in hand</span></button><button type="button" class="row" data-open="shape8"><span class="emo">🎱</span><span class="lab">Shape on the 8</span></button><button type="button" class="row" data-open="combo8"><span class="emo">🔗</span><span class="lab">Combo on the 8</span></button><button type="button" class="row" data-open="dry"><span class="emo">🌵</span><span class="lab">Dry break</span></button><button type="button" class="row" data-open="wing"><span class="emo">🪽</span><span class="lab">Wing-ball break</span></button><button type="button" class="row" data-open="dblbank"><span class="emo">🔁</span><span class="lab">Double bank</span></button><button type="button" class="row" data-open="kick4"><span class="emo">4️⃣</span><span class="lab">Four-rail kick</span></button><button type="button" class="row" data-open="call8"><span class="emo">📣</span><span class="lab">Call the 8</span></button><button type="button" class="row" data-open="scratchpath"><span class="emo">🚫</span><span class="lab">Scratch paths</span></button><button type="button" class="row" data-open="english"><span class="emo">🎯</span><span class="lab">Center ball</span></button><button type="button" class="row" data-open="b1hkit"><span class="emo">📦</span><span class="lab">Kitchen after scratch</span></button>
+</nav>
+<section class="pop" id="bank" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">↩️ The Bank</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+bank+shot+american">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The object ball has to hit a cushion and come back to a pocket. You are not aiming at the hole. You are aiming at a diamond on the rail. The pocket is only where the rebound finishes.</p><p><em>When</em>Use it when the straight window is ugly — a ball in the way, a scratch line, or a pocket that would dump the white. The bank is the long way that is still a shot.</p><p><em>Aim</em>A long rail has seven diamonds between the corners. A short rail has three. Count from the pocket you want, not from your feet. The contact on the rail is measured from the point where the ball kisses the cushion, which is a hair before the center of the ball. Equal angle starts there.</p><p><em>Speed</em>Speed stretches a bank. Firm makes the ball take a longer path and often overruns the pocket. Medium or soft lets it die in the jaws. Running english lengthens the path more. Hold-up english shortens it. If you do not mean the spin, shoot center.</p><p><em>Leave</em>The white should not follow the object ball into the same rail. Stun or a touch of draw parks the cue ball. Plan that leave before you bank it, or you make a great bank and hook yourself.</p><p><em>Dead</em>It is dead when you undercut and pour pace on it. The ball kisses too far down the rail and runs past the hole. If you keep missing long, you are hitting too hard or aiming past the diamond.</p></div>
+</section><section class="pop" id="kick" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🪃 The Kick</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+kick+shot+american">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Cue ball hits a cushion first, then the object ball. That is how you hit a ball you cannot see clean — or should not hit clean, because the direct line is a scratch.</p><p><em>When</em>The first rail is the aim. Pick a diamond. Draw the path from that diamond to the object ball. Do not stare at the hidden ball and hope the white finds it.</p><p><em>Aim</em>One-rail kicks are usually mirror shots: imagine the ball reflected through the rail and shoot at the reflection. Two- and three-rail kicks need a count (plus system) or a path you have already walked with your eyes.</p><p><em>Speed</em>Speed has to survive the rails and still move the object ball. A dead kick that only kisses the ball leaves you hooked again. Too much speed flies off the last rail and misses the hit.</p><p><em>Leave</em>After contact you still want a table you can live with — a shot, or a safety they cannot see. Kicking the ball and scratching the side is not a win.</p><p><em>Dead</em>It is dead when the white hits the object ball first. That was never a kick. It is also dead when you pick the wrong diamond and play the same wrong path three times.</p></div>
+</section><section class="pop" id="kick2" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">2️⃣ Two-rail kick</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+two+rail+kick">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Two cushions, then the ball. One rail still cannot see it. You are sending the white to a first diamond so the second rail can aim the hit.</p><p><em>When</em>Walk the path before you down: first rail, second rail, ball. The second rail is the real aim. The first rail only exists to deliver the white there with the right angle.</p><p><em>Aim</em>Running english helps the cue ball hug the second rail instead of bouncing off short. Center ball often dies before rail two. That is why a two-rail kick that ‘looks right’ still misses — the spin was missing.</p><p><em>Speed</em>Use enough pace to complete both rails. A poke that dies on rail one is not a soft touch. It is an unfinished shot.</p><p><em>Leave</em>Leave: any legal hit is the floor. A white that stops with a view of the next ball is the extra. Don’t require the extra to take the kick.</p><p><em>Dead</em>Dead: first rail too short. You never arrive at rail two. Or first rail too long, so rail two sends the white behind the object ball.</p></div>
+</section><section class="pop" id="kick3" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">3️⃣ Three-rail kick</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+three+rail+kick">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Three cushions, then the ball. This is a drawn path, not a slap. Usually corner to corner, or a long-short-long route that unwraps a hook.</p><p><em>When</em>Count out loud: one, two, three, ball. If you cannot name the third rail before you shoot, you are guessing. The last rail aims the contact.</p><p><em>Aim</em>The plus system lives here. You add diamonds instead of inventing a line. Medium running speed is what most counts assume. A punch throws the number off.</p><p><em>Speed</em>The stroke is long and smooth. Three-rail dies when you jab it. The white needs to keep shape through three kisses of cloth and rubber.</p><p><em>Leave</em>Success is a legal hit on the object ball. Pocketing it is a gift. Scratching the corner after a pretty path is still a foul.</p><p><em>Dead</em>Dead: rushing. Or changing the third rail in mid-stroke because the first two ‘looked close.’</p></div>
+</section><section class="pop" id="kick8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🎱 Kick to the 8</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+kick+to+the+8+ball">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Same kick — rail first — but the only legal target is the 8. In 8-ball that is often how you avoid a foul when the 8 is hooked. In 9-ball it is rotation: the 8 is the lowest ball you can see only off a rail.</p><p><em>When</em>Aim the diamond that sends the white into the 8, not into a stripe or solid that happens to be nearby. First contact must be the 8.</p><p><em>Aim</em>Move the 8. A kiss that does not move it means you will still be kicking next inning, or they will. Side pockets eat kicked 8s and scratched whites. Look at those holes before you shoot.</p><p><em>Speed</em>If the 8 can fall, know the rule you are playing. Some bars lose the game if the 8 goes on a foul. Don’t kick the 8 into a pocket you cannot see.</p><p><em>Leave</em>Leave the white off the scratch lines that appear after a kicked 8. Corners near the 8 are hungry.</p><p><em>Dead</em>Dead: hitting any other ball first. Foul. Or potting the 8 on a sloppy kick you did not call as a win.</p></div>
+</section><section class="pop" id="banksid" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">↔️ Bank to the side</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+bank+to+side+pocket">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Object ball off a rail into a side pocket. Side pockets are smaller than corners and they punish extra speed.</p><p><em>When</em>Use it when a corner bank is the long way or the corner is blocked. The side is the hole the rebound actually sees.</p><p><em>Aim</em>Aim so the outbound line points at the center of the side, not a jaw. If you aim a jaw, pace will rattle both points and the ball sits in the mouth.</p><p><em>Speed</em>This is the bank you must slow down. Firm side-banks talk to both knuckles of the pocket. Soft to medium. Let it fall.</p><p><em>Leave</em>Keep the white off that same side pocket. A follow-bank into the side is a scratch waiting to happen. Stun or draw.</p><p><em>Dead</em>Dead: too firm. Rattle, sit, and a long walk around the table.</p></div>
+</section><section class="pop" id="xcorn" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">↘️ Cross-corner bank</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+cross+corner+bank">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Bank across the table into the far corner. The near corner is dead. The far corner is the hole the geometry likes.</p><p><em>When</em>The contact on the long rail is farther from you than your eye wants. Count diamonds from the far corner. People miss this bank short because they aim the near diamond.</p><p><em>Aim</em>Medium speed. Too soft dies on the rail. Too hard overcuts and the ball takes a longer path than the corner.</p><p><em>Speed</em>Stun keeps the white near center after a cross-corner. Follow sends it to the far short rail. Pick one on purpose.</p><p><em>Leave</em>If the object ball is close to the banking rail, the shot gets squatter and throw matters more. Hit a touch fuller or a touch softer.</p><p><em>Dead</em>Dead: aiming the near diamond and watching the ball die on the long rail, two feet short of the corner.</p></div>
+</section><section class="pop" id="shortb" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📐 Short rail bank</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+short+rail+bank">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Off the short rail — the head rail or the foot rail — then into a pocket. Short path. Three diamonds between the corners, not seven.</p><p><em>When</em>Use it when the ball is already near a short rail. A long-rail bank from there is a tour you do not need.</p><p><em>Aim</em>Mirror the pocket through the short rail. The middle diamond on a short rail is the side-pocket line. The quarter diamonds feed the corners.</p><p><em>Speed</em>Less speed than a long bank. The ball does not have far to go. Extra pace only throws the angle.</p><p><em>Leave</em>Do not let the white follow into the short rail and scratch the nearby corner. That scratch is the standard miss after a good object-ball path.</p><p><em>Dead</em>Dead: banking the long rail out of habit because ‘bank’ always meant the long cushion to you.</p></div>
+</section><section class="pop" id="longb" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📏 Long rail bank</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+long+rail+bank">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Off a long rail, then a pocket. Most come-back banks live here. Seven diamonds between corners. That count is the aim.</p><p><em>When</em>Stand so you can see the diamonds on the rail you will use. Count from the target pocket: 1, 2, 3… The number you want is the kiss, not a spot of empty cloth.</p><p><em>Aim</em>Center ball or a little hold-up. Running english makes a long bank longer. If the diamond is correct and the ball still runs long, you either hit too hard or you added spin you did not count.</p><p><em>Speed</em>White should leave that long rail. Draw or stun. Following the object ball down the same cushion is how you scratch the far corner.</p><p><em>Leave</em>When the ball is frozen or near-frozen to the banking rail, this becomes a different shot (rail-first / frozen). Don’t treat a freeze like a floating bank.</p><p><em>Dead</em>Dead: the diamond was right and the spin moved it. Or you aimed between diamonds and called it close.</p></div>
+</section><section class="pop" id="stop" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">✋ Stop shot</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+stop+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Object ball goes. Cue ball stays on the contact spot. That is position when the next ball wants the white right here.</p><p><em>When</em>The white must arrive with backspin that dies at contact. Center, or a hair below. A rolling white cannot stop. If you can see the white rolling forward on the last foot, you will follow.</p><p><em>Aim</em>Distance eats spin. A stop at two feet is not a stop at five feet. Longer stop shots need a firmer stroke so the backspin survives the trip — not a higher tip.</p><p><em>Speed</em>The leave is the spot you are standing in. If that is wrong, this was the wrong shot. Don’t invent follow after you missed the stop.</p><p><em>Leave</em>Drill it in a line. Same pocket, growing distance. Dead means dead at every length.</p><p><em>Dead</em>Dead: a crawl forward you still call a stop. Tip crept up, or the spin died early.</p></div>
+</section><section class="pop" id="follow" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">➡️ Follow</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+follow+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>After contact the white rolls forward through the object ball’s old line. Next shot is past this ball.</p><p><em>When</em>Tip above center. Let the white start rolling before it arrives. A sliding white with a high tip still stuns.</p><p><em>Aim</em>Name the window. Soft follow is a foot past the spot. Force follow is through a gap or across the table. Those are different strokes. Don’t use one word for both.</p><p><em>Speed</em>Stop the white in the window for the next angle, not on the far rail. Follow that hits a rail you did not name is just a miss with extra travel.</p><p><em>Leave</em>If the cut is not straight, follow changes the tangent. A cut-follow does not stay on the original line. Plan the curve.</p><p><em>Dead</em>Dead: you needed follow and you stopped. Or you blasted through and kissed the next rail into a hook.</p></div>
+</section><section class="pop" id="draw" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⬅️ Draw</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+draw+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>After contact the white comes back toward you. Next ball is behind this one, or you need to pull off a rail.</p><p><em>When</em>Tip below center. Keep the cue as level as the table allows. Scooping is not draw. Backspin has to still be alive when you hit the object ball.</p><p><em>Aim</em>More distance needs more spin or more speed, not a steeper cue. If the white dies on the spot, the spin never arrived.</p><p><em>Speed</em>Draw to a zone. ‘As far as it goes’ is how you scratch the rail behind you. Pick the landing, then hit that landing.</p><p><em>Leave</em>On a cut, draw does not come straight back. It comes back off the tangent. If you need straight back, you needed a straighter shot.</p><p><em>Dead</em>Dead: miscue. Or a white that never returns because the tip was only a little low and the stroke was polite.</p></div>
+</section><section class="pop" id="kitchen" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🏠 Draw to kitchen</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+draw+to+kitchen">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Pot the ball and pull the white behind the head string. The kitchen is the area from the head rail to that line — the same line you break from.</p><p><em>When</em>You want the white safe, or the next ball lives back there. Crossing the line is the job. Kissing the head rail is extra and often a scratch.</p><p><em>Aim</em>Low tip, as straight a shot as you can find. The head string is a finish line painted in your head. Watch the white cross it.</p><p><em>Speed</em>Enough pace to get behind the line. Not enough to bury the white in the head corner. That corner eats drawn cue balls.</p><p><em>Leave</em>If you cannot draw that far, you don’t have this shot. Pick a different first ball or play a safety.</p><p><em>Dead</em>Dead: a draw that stops in the center of the table. Pretty motion, wrong country.</p></div>
+</section><section class="pop" id="stun" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⚡ Stun</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+stun+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The white slides into the ball with no roll and no draw, then takes the tangent line — 90 degrees off a full hit, less off a cut.</p><p><em>When</em>Use it when you need the white to go sideways, not forward or back. Most pattern play is stun, not the drama of draw.</p><p><em>Aim</em>Center tip. Time the hit so any roll has died when you arrive. At distance that means a firmer, shorter stroke than people think.</p><p><em>Speed</em>Read the tangent before you shoot. After a half-ball hit the white will leave on a line you can see if you look. That line is the leave.</p><p><em>Leave</em>A little top turns stun into follow. A little low turns it into draw. The whole shot is tip discipline.</p><p><em>Dead</em>Dead: you thought stun and you followed, because the white was still rolling at contact.</p></div>
+</section><section class="pop" id="force" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⏩ Force follow</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+force+follow">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Follow with authority. The white must go through a gap, past traffic, or a long way down the table.</p><p><em>When</em>High center, committed stroke. You are sending the white, not nudging it. A polite follow dies in the first ball it meets.</p><p><em>Aim</em>See the gap before you shoot. If the gap is smaller than the white, this is not force follow. This is a carom or a different first ball.</p><p><em>Speed</em>Pace should arrive, then stop in the next window. Force follow that still rolls to a rail you did not pick is just a break.</p><p><em>Leave</em>Don’t use force follow to hide a bad angle. It is a position tool, not a cover-up.</p><p><em>Dead</em>Dead: poking it. Afraid force follow is a bad stop with a high tip.</p></div>
+</section><section class="pop" id="center" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🎯 Center-table leave</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+center+table+position">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Park the white near the middle. From center, most of the table is a shot and most scratches get farther away.</p><p><em>When</em>After a break, or when balls live on both halves, center is the reset. The pot in front of you is only there to buy that reset.</p><p><em>Aim</em>Often a stop or a small stun-follow to the center spot. Sometimes a short draw. The pot is easy. Pace is the shot.</p><p><em>Speed</em>A hand-span from the center of the cloth is close enough. You are not threading a needle. You are refusing to land on a rail.</p><p><em>Leave</em>Over-rolling to the opposite rail puts you in the same problem on the other side. Short of center is usually safer than past it.</p><p><em>Dead</em>Dead: a beautiful pot and a white glued to the far rail, staring at nothing.</p></div>
+</section><section class="pop" id="thin" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔪 Thin cut</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+thin+cut">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You only want a sliver of the object ball. A fat hit sends it to the wrong rail or dumps the white in a pocket.</p><p><em>When</em>The pocket is almost behind the ball. Stand so you can see the sliver. If you cannot see the edge you want, you will hit too much ball.</p><p><em>Aim</em>Ghost-ball overlap is a sliver, not a half-ball. Trust that. Your instinct will ask for more ball and miss the cut.</p><p><em>Speed</em>Soft holds the tangent and reduces throw. Firm throws the object ball and can still miss thin. Thin plus pace also scratches more.</p><p><em>Leave</em>The white will run. Name the scratch rails before you cut it. If the run-off is a corner, change the shot or the speed.</p><p><em>Dead</em>Dead: too much ball. It goes to the long rail while you watch the pocket you almost had.</p></div>
+</section><section class="pop" id="frozen" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🧊 Frozen ball</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+frozen+ball+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>No gap. The ball is frozen to a rail, or frozen to another ball. You cannot cheat an angle that does not exist.</p><p><em>When</em>Rail-frozen: treat rail and ball as one piece. Often you hit into both together. Trying to slice air that isn’t there just dumps the white.</p><p><em>Aim</em>Ball-frozen to another ball: the line through both centers is the only honest line. Combos and clusters start here.</p><p><em>Speed</em>Firm enough to break the freeze. Soft frozen shots sit there and look thoughtful.</p><p><em>Leave</em>Know which ball is allowed to move first — 8-ball and 9-ball both care. A freeze is how people foul without noticing.</p><p><em>Dead</em>Dead: pretending there is a sliver of daylight and slicing it.</p></div>
+</section><section class="pop" id="rail1" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🪵 Rail-first</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+rail+first+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You hit the cushion and the object ball together, or the cushion a hair first. The ball is on the rail.</p><p><em>When</em>A direct hit on a rail ball often double-kisses or scratches the nearest corner. Rail-first is how you send that ball down the cushion or off it without the double kiss.</p><p><em>Aim</em>Aim the rail just before the ball. The bounce throws the object ball. You are using rubber, not pretending the ball is floating.</p><p><em>Speed</em>Committed stroke. A timid rail-first still double-kisses and dies.</p><p><em>Leave</em>Watch the nearest corner. That is the standard scratch after you finally hit it well.</p><p><em>Dead</em>Dead: hitting only the ball and calling it rail-first because you were close to the wood.</p></div>
+</section><section class="pop" id="dead" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">💀 Dead-ball hit</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+dead+ball+hit">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Kill every bit of roll at contact. The white becomes a stone. Any crawl forward or back ruins a stack, a freeze, or a tight safety.</p><p><em>When</em>True center. Firm. Short finish. Backspin should already be gone. Forward roll should not have started. That window is small.</p><p><em>Aim</em>This is not a soft stop. Soft still rolls. Dead is a punch that arrives with nothing left.</p><p><em>Speed</em>Use it on a ball you must touch without opening a lane behind it. Clusters, frozen 8s, safeties that cannot afford a roll.</p><p><em>Leave</em>If you can see the white moving after contact, it was not dead. Don’t argue with the cloth.</p><p><em>Dead</em>Dead miss: a dying crawl you still name dead because it was almost still.</p></div>
+</section><section class="pop" id="combo" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔗 Combination</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+combination+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The ball you hit drives a second ball into a pocket. First-ball center, through second-ball center, through the hole. If that line is a lie, the combo is a lie.</p><p><em>When</em>The front ball must be legal to hit. In 9-ball that means the lowest ball is the first ball, even in a combo.</p><p><em>Aim</em>Firm enough to transfer energy. Soft combos die on the second ball and look like you ‘almost had the line.’</p><p><em>Speed</em>White after the first contact is part of the shot. Combos scatter. Don’t pot the combo and scratch in the hole you just opened.</p><p><em>Leave</em>If you need a thin hit on the first ball to ‘make the line work,’ you don’t have a combo. You have a wish.</p><p><em>Dead</em>Dead: thin on the first ball so the second never starts.</p></div>
+</section><section class="pop" id="carom" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">💥 Carom</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+carom+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A glance off one ball that sends you — or that ball — into the next target. A full hit stops everything. You need the edge.</p><p><em>When</em>Aim the sliver of the first ball that points at the second target. The thinner the kiss, the more speed survives.</p><p><em>Aim</em>Caroms are how you move the white when a stop or follow cannot turn the corner. They are also how you knock a blocker off a line.</p><p><em>Speed</em>Keep pace through the glance. A dead carom kisses and sits. That helps no one unless sitting was the safety.</p><p><em>Leave</em>Name both contacts. If you can only name the first, you are just hitting a ball.</p><p><em>Dead</em>Dead: square hit on the first ball. Both stall. You stare at the second target from a foot away.</p></div>
+</section><section class="pop" id="billiard" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⚪ Billiard</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+billiard+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The cue ball must kiss two balls: A, then B. One contact is not the shot.</p><p><em>When</em>Plan the leave off A so the white still sees B. That is a stun or thin-carom decision, not a hope.</p><p><em>Aim</em>Keep enough pace after A. Most missed billiards die on the first kiss and never arrive.</p><p><em>Speed</em>In some rooms ‘billiard’ means this two-kiss white-ball shot. Don’t mix it up with a carom that sends an object ball.</p><p><em>Leave</em>If B is the 8 or the 9, first contact still has to be legal. A pretty second kiss does not erase a foul first kiss.</p><p><em>Dead</em>Dead: killing the white on A and calling it close because B was ‘right there.’</p></div>
+</section><section class="pop" id="safety" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🛡️ Safety</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+safety+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You are not trying to pot. You are taking the next shot away from them. Distance plus a hook beats a weak hide.</p><p><em>When</em>Use it when the out is thin, hooked, or a hero cut you don’t need this inning. Making a low-percentage ball and hooking yourself is not bravery.</p><p><em>Aim</em>Hide the object ball or hide the white. Two-way shots are fine — a safety that can still fall — but the miss must still be a safety.</p><p><em>Speed</em>Soft is usually enough. Hard safeties open windows and scratch. Don’t break a rack with a safety.</p><p><em>Leave</em>Success: they cannot see a legal hit they want. If they can still stand still and pot, you played offense and missed.</p><p><em>Dead</em>Dead: a ‘safety’ that leaves them a stand-up shot they thank you for.</p></div>
+</section><section class="pop" id="push" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📤 Push-out</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=9-ball+push+out">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>After the break in 9-ball you may push the white anywhere. They can shoot that leave or pass it back to you. You only get this immediately after the break.</p><p><em>When</em>Use it when the 1 is ugly and a hero out would give the table away. Push to a shot you would take if they gave it back.</p><p><em>Aim</em>It is just a roll. This is not a second break. Don’t send the 1 into a worse jail.</p><p><em>Speed</em>Think one inning ahead. If they take the shot, you must live with what they miss. If they pass, you must want the shot you just built.</p><p><em>Leave</em>Illegal push (hitting a ball you shouldn’t, or skipping the call) is a foul in many events. Know the house.</p><p><em>Dead</em>Dead: pushing into a worse hook than the one the break already gave you.</p></div>
+</section><section class="pop" id="jump" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🦘 Jump</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+jump+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The white goes over a blocker and still hits the object ball. Kick is the other door. Jump is the short door with more fouls in it.</p><p><em>When</em>Strike down into the cloth behind the white. Jump cues exist because a regular cue invites a scoop. Scooping is a foul on most bar and league rules.</p><p><em>Aim</em>See the landing. Clearing the blocker and missing the object ball is only half a jump. Clearing the blocker and landing on it is a foul.</p><p><em>Speed</em>Crisp stroke. A hesitant jump either scoops or picks the cue ball up into your chest.</p><p><em>Leave</em>If you don’t have a jump cue and the house hates jumps, kick instead. The menu name is not a dare.</p><p><em>Dead</em>Dead: scooping under the ball, or landing on the blocker and calling it close.</p></div>
+</section><section class="pop" id="masse" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🌙 Masse</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+masse+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The white curves around something because you elevated and spun it. The first inch is almost straight. Then it turns.</p><p><em>When</em>Use it when kick and jump are worse. Masse is not the default come-around. It is the last clean idea.</p><p><em>Aim</em>High bridge, tip off-center, cue up. You need cloth grab. Dirty, humid, or lightning-fast cloth will not hold the bend.</p><p><em>Speed</em>Small masse (a little elevation) is a different shot from a full vertical masse. Start with the small one unless you like cloth repair.</p><p><em>Leave</em>The bend must actually reach the ball. A pretty curve that dies a foot short is just a show.</p><p><em>Dead</em>Dead: a straight miscue that tears the cloth. Or no curve at all because the tip was only slightly off and the cue was only slightly up.</p></div>
+</section><section class="pop" id="three" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔢 3-ball run</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+3+ball+pattern+drill">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Three balls, one idea: each pot exists to land the next. If you only make the first, you did not do the drill.</p><p><em>When</em>Pick any three that make a sentence. Decide the order before the first stroke. Side of the next ball matters more than which pocket this one uses.</p><p><em>Aim</em>Stop, stun, or follow — pick one per ball on purpose. Random pace is how a 3-ball becomes a 1-ball plus a mess.</p><p><em>Speed</em>After A you should already see B. After B you should already see C. If you have to walk around the table to discover C, the leave failed.</p><p><em>Leave</em>Run it both directions. The other order teaches the other leave.</p><p><em>Dead</em>Dead: making the first and landing on the wrong side of the second, then inventing a kick.</p></div>
+</section><section class="pop" id="leave" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⚖️ Wrong / right leave</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+position+play+leave">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Same pot. Two sides to land on. Only one side is a shot. The pocket is easy. The next ball is the work.</p><p><em>When</em>Before you shoot, point at the side of the next ball that still has a pocket. That side is the target, not ‘somewhere over there.’</p><p><em>Aim</em>Pace decides right vs wrong more than aim does. A perfect line with too much roll becomes the wrong side. A hair less would have been the out.</p><p><em>Speed</em>Stand still after and look. If you cannot see the next pot without a speech, it was the wrong leave.</p><p><em>Leave</em>Do this as a drill with two object balls only. Pocket the first twenty times. Count how many times the second is still a shot.</p><p><em>Dead</em>Dead: holing it and waving at a ball you just hid behind the 8.</p></div>
+</section><section class="pop" id="one9" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">9️⃣ 1–9 in order</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=9-ball+run+out+drill">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Rotation. The lowest ball is always the job. The leave is the drill. Pocketing the 3 and hooking the 4 is a loss even if the 3 dropped pretty.</p><p><em>When</em>While this one falls, you are already on the next number. That is the only way 1 through 9 happens on purpose.</p><p><em>Aim</em>Stop when you need the same zone. Follow only when the next ball is past this one. Draw when the next ball is behind you. Name it.</p><p><em>Speed</em>Clusters: if 5-6 are tied up, the 4’s leave is not ‘make the 4.’ The 4’s leave is the angle that opens 5-6.</p><p><em>Leave</em>A missed leave is a missed shot. Don’t keep score as pots only.</p><p><em>Dead</em>Dead: tunnel vision on the pot in front of you while the next number disappears.</p></div>
+</section><section class="pop" id="last5" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">5️⃣ 8-ball last-five</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=8-ball+last+five+balls">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Five of yours plus the 8 in your head. Finish. The table is open enough that a safety should be a choice, not an escape.</p><p><em>When</em>Order the five so the 8 stays an easy last ball. Don’t leave the 8 frozen or on a rail because you took the pretty stripe first.</p><p><em>Aim</em>Pace is for the 8’s angle, not for show-off position on ball three. You can waste one easy ball to fix the 8. You cannot waste the 8 to look good.</p><p><em>Speed</em>If two of yours are tied up, those come out while you still have a tool ball. Last-five is where people save the hard one ‘for later’ and then have no later.</p><p><em>Leave</em>Walk the five before you shoot the first.</p><p><em>Dead</em>Dead: the show-off pot that traps the 8 on the rail.</p></div>
+</section><section class="pop" id="solids" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🟠 Clear solids</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=8-ball+run+solids">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You are low. Every solid comes off before you think about the 8 as a pot. The 8 is only a leave problem until the last solid falls.</p><p><em>When</em>Open the ugly solid first, while you still have an easy one to land from. Saving the frozen 4 for last is how solids turn into a kick on the 8.</p><p><em>Aim</em>Work toward the 8’s best angle, not away from it. Each pot should make the 8 easier, even before you are allowed to shoot it.</p><p><em>Speed</em>Don’t knock a stripe into a problem you will own later. You can still lose with no solids left.</p><p><em>Leave</em>If a solid is tied to a stripe, decide now: combo, kiss off, or safety. Don’t discover it on the last solid.</p><p><em>Dead</em>Dead: nudging a stripe in front of the 8 and calling the table clear.</p></div>
+</section><section class="pop" id="stripes" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔵 Clear stripes</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=8-ball+run+stripes">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You are high. Same job as solids, other paint. Every stripe off. 8 stays a shot.</p><p><em>When</em>Tucked stripe comes out early, while you still have a tool ball. The 15 frozen on the rail is not ‘later.’ Later is when you have no angle.</p><p><em>Aim</em>Land toward the 8, not into a corner you cannot leave. Stripes spread more after a break; use the open ones to move, not just to count.</p><p><em>Speed</em>A stripe-on-solid cluster is your problem the moment you chose stripes. Deal with it while extras still exist.</p><p><em>Leave</em>Don’t hook yourself on your own last stripe. That is an 8-ball special.</p><p><em>Dead</em>Dead: saving the frozen stripe for last and then kicking at the 8 like it was the plan.</p></div>
+</section><section class="pop" id="rwalk" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🚶 Rail walking</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+rail+walking+drill">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The white stays on the cushion the whole way. On the rail means on the rail — no sliver of cloth between ball and wood after it stops.</p><p><em>When</em>Start with the white already kissing a rail. Travel along that rail. A thin parallel hit or a stun that refuses to come off.</p><p><em>Aim</em>Soft. Hard shots bounce off the cushion and that is a miss, even if you pot something else.</p><p><em>Speed</em>This is position for rail-first tables and for 8s that live on a rail. If you cannot walk the rail, you will always leave the white in the middle when you needed the wood.</p><p><em>Leave</em>Do long rail, then short rail. Both.</p><p><em>Dead</em>Dead: an inch of cloth showing. The drill ended there, not at the pocket.</p></div>
+</section><section class="pop" id="line5" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">➖ Line of 5</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+line+up+drill+5+balls">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Five balls in a file, one pocket. The white stays in that file. No pattern speech. Stop shot, stop shot, stop shot.</p><p><em>When</em>Set them a ball’s width apart so a small error shows. If they are glued together you can cheat.</p><p><em>Aim</em>Each contact is a stop. If the white drifts left or right, the line is broken and the next ball is a cut you did not want.</p><p><em>Speed</em>This is how you find out whether your stop is real. Five in a row does not lie.</p><p><em>Leave</em>When five is easy, make it six, or start farther from the first ball.</p><p><em>Dead</em>Dead: a sideways leave after ball two, then a story about ‘the table rolled.’</p></div>
+</section><section class="pop" id="ladder" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📶 Stop-shot ladder</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+stop+shot+ladder+drill">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Same stop, longer every time. Distance is the only thing that changes. The tip does not wander up just because the ball is farther.</p><p><em>When</em>Clear lane, trusted pocket. First stop at two feet. Then three. Then four. Dead white at every mark.</p><p><em>Aim</em>Spin must survive the trip. That is why the stroke grows and the tip stays center-low. Longer is firmer, not higher.</p><p><em>Speed</em>If you start following at four feet, you never had a four-foot stop. Go back to three until three is boring.</p><p><em>Leave</em>Count makes. Don’t count almosts.</p><p><em>Dead</em>Dead: a roll you still call a stop because it was almost still.</p></div>
+</section><section class="pop" id="diamond" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">💎 Diamond system</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+diamond+system">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The inlaid dots are aiming marks for banks and kicks. They divide each rail into equal parts. A 9-foot long rail has seven diamonds between corners. A short rail has three.</p><p><em>When</em>Use them whenever you would otherwise guess a rail. Guessing is how you play the same miss twice.</p><p><em>Aim</em>Count from a corner pocket. The number you pick is the contact on the rubber, not a pretty spot of cloth. Stand so the diamonds are visible — if you cannot see them, you cannot use them.</p><p><em>Speed</em>Most simple systems assume medium speed and little english. Hard speed and running english both throw the count long.</p><p><em>Leave</em>Walk one system until it is boring: one-rail banks to a corner, same speed, count only.</p><p><em>Dead</em>Dead: aiming at empty cloth between diamonds and saying you used the system.</p></div>
+</section><section class="pop" id="plus" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">➕ Plus system</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+plus+system+kicking">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A counting method for multi-rail kicks. You add diamonds instead of inventing a line. This is for two-rail and three-rail when one target diamond is not obvious.</p><p><em>When</em>Start from the object ball’s diamond number, add the path number for the route you chose, and aim that sum on the first rail. Learn one printed chart and stay with it. Mixing systems mid-rack is how the count becomes a mood.</p><p><em>Aim</em>The count assumes a running, medium hit. A punch, a hold-up, or a dead ball will not land on the number you added.</p><p><em>Speed</em>Use it on the same two-rail path twenty times before you trust it in a match. The menu name does not install the system in your hands.</p><p><em>Leave</em>If you cannot name the sum out loud, you are not using plus. You are kicking and hoping.</p><p><em>Dead</em>Dead: skipping the count after you already knew the name of the system.</p></div>
+</section><section class="pop" id="mirror" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🪞 Mirror system</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+mirror+system+kicking">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Imagine the pocket or the ball reflected through the rail, as if another table were glued to that cushion. Shoot at the reflection. The aim point is where that mirrored line crosses the rubber.</p><p><em>When</em>This is the cleanest one-rail kick and a clean way to see some banks. If you can see the mirrored target, you do not need a big count.</p><p><em>Aim</em>Same speed you would use if the mirrored table were real. Extra pace throws the mirror just like it throws a bank.</p><p><em>Speed</em>Pick one rail and one pocket and mirror only that for a night. Side pocket mirrors off a long rail. Corner mirrors off the opposite long rail.</p><p><em>Leave</em>If two rails are involved, the simple mirror is usually not enough. Switch to a count or a known two-rail path.</p><p><em>Dead</em>Dead: mirroring the wrong pocket and hitting a perfect wrong rail.</p></div>
+</section><section class="pop" id="b8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🟢 8-ball break</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=8-ball+break">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Open an 8-ball rack so you have a shot and the 8 stays on the table. The 8 sits in the middle of a 15-ball triangle.</p><p><em>When</em>Pick a plan and keep it: second ball in the stack, or a committed wing-ball hit. A slash that ‘just hits them hard’ scratches and walks the 8.</p><p><em>Aim</em>Hard, but on a line. The head string is where you start. Behind the line. White should come back to the kitchen or sit center with a shot, not disappear into a side.</p><p><em>Speed</em>If a ball falls, you keep shooting. If nothing falls, they get a full table. Either way the 8 in a pocket on the break is trouble in most bar rules — know yours.</p><p><em>Leave</em>Look at the two back corners of the rack. That is where the 8 likes to sneak out.</p><p><em>Dead</em>Dead: a glue rack, or the 8 going early while you celebrate a wing ball.</p></div>
+</section><section class="pop" id="scratch8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">❌ 8-ball scratch</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=8-ball+scratch+foul">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Know what the foul costs before you shoot. A normal scratch is ball-in-hand for them in many games. A scratch on the 8, or the 8 in the wrong pocket, is often loss of game.</p><p><em>When</em>You are about to cut thin near a hole, or the 8 is the ball. Look at the white’s escape rails. If a corner is waiting, change speed or change the shot.</p><p><em>Aim</em>House rules differ. APA, bar, and winner-stays are not the same paragraph. Ask once. Don’t discover it on the 8.</p><p><em>Speed</em>If they just fouled, take ball in hand and look at the 8 as a leave problem, not a hero pot.</p><p><em>Leave</em>Don’t use match pace when the white can see a pocket. The 8 does not need your hardest stroke.</p><p><em>Dead</em>Dead: shooting the 8 like it is just another solid, then shrugging at the scratch.</p></div>
+</section><section class="pop" id="b9" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔶 9-ball break</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=9-ball+break">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Hit the 1 first. Open a 9-ball diamond. Keep the white on the table. The 9 sits in the middle. The 1 is the only legal first ball.</p><p><em>When</em>Square on the 1. A wing-ball plan is a plan, not a slash. Glancing the 1 is how the side pocket eats the white.</p><p><em>Aim</em>Behind the head string. Firm. The 1 should go, and the rack should open enough that the next lowest ball is a shot.</p><p><em>Speed</em>If the 9 falls on a legal break, that is the snap — game, in most rooms. If nothing goes, they walk to a messy table. Both results start with a legal 1.</p><p><em>Leave</em>Watch the sides. 9-ball scratches live there more than in 8-ball.</p><p><em>Dead</em>Dead: a nick on the 1 and a scratch, or a break that never touched the 1 square.</p></div>
+</section><section class="pop" id="snap" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">✨ 9 on the snap</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=9-ball+9+on+the+break">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The 9 leaves the middle of the rack and finds a pocket on the break. Energy has to reach her through the 1. A weak break never sends the 9.</p><p><em>When</em>You still must hit the 1 first and keep the white on the table. A 9 that falls after a foul is not a win.</p><p><em>Aim</em>Committed hit on the 1. People who want the snap and poke the 1 get a pretty spread and a stuck 9.</p><p><em>Speed</em>Watch the 9’s path off the stack, not only the wing balls. If she only wiggles, you didn’t reach her.</p><p><em>Leave</em>This is not the only way to win a 9-ball rack. Don’t throw the white away chasing a highlight.</p><p><em>Dead</em>Dead: a pretty spread with the 9 stuck in traffic, and a white in the side.</p></div>
+</section><section class="pop" id="legal" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">✅ Legal first hit</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=9-ball+legal+first+hit">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The lowest numbered ball on the table must be the first ball the white touches. After that, slop is often allowed — house rules. First contact is not slop.</p><p><em>When</em>If that lowest ball is hidden, you kick, combo, or carom. All legal. Hitting a higher ball first and then the 1 is not legal.</p><p><em>Aim</em>Point to the first kiss in your head before you shoot. If you cannot name it, you are about to foul.</p><p><em>Speed</em>Combo is fine when the lowest ball is the front ball. Combo is a foul when a higher ball is the front ball.</p><p><em>Leave</em>After a miss they get the table, not a lecture. Make the first hit so boring you forget it.</p><p><em>Dead</em>Dead: a combo that kisses a higher ball first and then the 1, while you watch the 1 fall and still lose the inning.</p></div>
+</section>
+<section class="pop" id="runeng" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🌀 Running english</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+running+english">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Running english is sidespin that matches the way the cue ball is already travelling into a rail. The white grabs the cushion and leaves fuller, longer, more forward.</p><p><em>When</em>Use it on banks and multi-rail kicks when the count or the diamond assumes the ball will run, not die.</p><p><em>Aim</em>Aim the same diamond you already picked, then add a little spin toward the run. Don’t change the diamond and the spin in the same guess.</p><p><em>Speed</em>Soft-to-medium. Hard running english throws the path long and dumps the white.</p><p><em>Leave</em>Leave is longer than center ball. Plan the extra travel.</p><p><em>Dead</em>Dead: adding run because it ‘looks pro’ on a shot that needed hold-up.</p></div>
+</section><section class="pop" id="holdup" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🛑 Hold-up english</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+hold+up+english+reverse">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Hold-up (reverse) english fights the rail. The white shortens, comes off fatter, dies sooner.</p><p><em>When</em>Use it when a bank or kick would run too long with center ball, or when you must kill the white on the rail.</p><p><em>Aim</em>Tip a little opposite the run. Small amount. Heavy reverse miscues and still throws the object ball.</p><p><em>Speed</em>Softer than a running hit. Reverse plus pace fights itself.</p><p><em>Leave</em>The leave is shorter than you think. That’s the point.</p><p><em>Dead</em>Dead: reverse on a plus-system kick that was counted for running english.</p></div>
+</section><section class="pop" id="inside" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">↪️ Inside english</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+inside+english">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Inside english is sidespin toward the direction of the cut. Cutting a ball to the right with right spin is inside.</p><p><em>When</em>Use it to tighten a cut, help a follow-through leave, or throw the object ball a hair.</p><p><em>Aim</em>Inside throws the object ball. The pocket you see is not exactly the pocket you get. Aim a touch fuller or thinner on purpose, not by accident.</p><p><em>Speed</em>Keep speed honest. Inside plus firm is how thin cuts miss fat.</p><p><em>Leave</em>White takes a different tangent after contact. Name that tangent.</p><p><em>Dead</em>Dead: slapping inside on every cut because someone said spin helps.</p></div>
+</section><section class="pop" id="outside" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">↩️ Outside english</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+outside+english">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Outside english is sidespin away from the cut. Cutting right with left spin is outside.</p><p><em>When</em>Use it to hold a cut, reduce throw, or send the white to the other side of the tangent.</p><p><em>Aim</em>Outside can help a thin cut stay thin. It can also scratch the white into a corner you didn’t see.</p><p><em>Speed</em>Center-to-a-touch. A lot of outside on a thin cut is a miscue waiting.</p><p><em>Leave</em>Watch the white after. Outside often sends it to the long rail.</p><p><em>Dead</em>Dead: outside on a straight stop, which is just a sloppy stop.</p></div>
+</section><section class="pop" id="throw" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🧲 Throw</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+throw+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Throw is the object ball drifting off the aimed line because of friction and spin. Frozen balls and slow hits throw more.</p><p><em>When</em>Use the word when two balls are touching or nearly touching and a ‘straight’ combo isn’t straight.</p><p><em>Aim</em>Aim the second ball as if the first will push it slightly with the spin and the freeze. Frozen combos throw toward the spin.</p><p><em>Speed</em>Soft freeze throws more than a firm punch. If you need the true line, hit it firmer.</p><p><em>Leave</em>Don’t ignore throw on a frozen 8. That’s a loss, not a physics lesson.</p><p><em>Dead</em>Dead: aiming the visual line through two frozen centers and missing the pocket by a diamond.</p></div>
+</section><section class="pop" id="half" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">◐ Half-ball hit</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+half+ball+hit">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A half-ball hit covers half the object ball. The ghost ball sits so the white’s edge goes through the object ball’s center. The cut is about 30 degrees.</p><p><em>When</em>This is the reference hit. Thinner than this is a thin cut. Fuller is a thick cut. Learn what half-ball looks like from your stance.</p><p><em>Aim</em>Use it to calibrate. Many ‘I cut that too thin’ misses were a half-ball that you aimed as a sliver.</p><p><em>Speed</em>Speed: medium. You’re learning the picture, not the pace.</p><p><em>Leave</em>Leave follows the tangent of a 30-degree cut. Know that line.</p><p><em>Dead</em>Dead: calling every miss a thin cut when you keep hitting half-ball.</p></div>
+</section><section class="pop" id="straight" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">⬆️ Straight-in</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+straight+in+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The pocket, the object ball, and the white are on one line. No cut. This is stop, follow, or draw with no excuse.</p><p><em>When</em>Use it as the test for tip position. If you cannot stop, follow, and draw on a straight-in, you don’t have those shots yet.</p><p><em>Aim</em>Aim the center of the object ball. Sidespin on a straight-in is how you miss a gimme.</p><p><em>Speed</em>Pace is only for the leave. The pot should be boring.</p><p><em>Leave</em>If the next ball needs center table, this is a stop. If it needs through, follow. If it needs back, draw.</p><p><em>Dead</em>Dead: putting english on a straight-in ‘for position’ and missing the pocket.</p></div>
+</section><section class="pop" id="pocketspd" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🐢 Pocket speed</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+pocket+speed+die+in+jaws">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The object ball should fall without slapping both sides of the pocket and without flying in like a break ball. Die in the jaws.</p><p><em>When</em>Use it on every thin cut, side pocket, and bank. Extra speed is the main reason good lines miss.</p><p><em>Aim</em>Hit as soft as the leave allows. If the leave needs pace, change the angle, don’t punish the pocket.</p><p><em>Speed</em>Watch the last two feet. A ball that still looks loud there is too fast.</p><p><em>Leave</em>Dead: making it the hard way and calling the rattle a win.</p></div>
+</section><section class="pop" id="cluster" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🧱 Open a cluster</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+break+out+cluster">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A cluster is two or more balls tied up. Opening it means you send a ball — usually the white, sometimes an object ball — into the knot on purpose, with a leave after.</p><p><em>When</em>Use it when the next legal ball is in the pile, or when waiting a turn won’t free it.</p><p><em>Aim</em>Pick which ball in the cluster can move. Hit that one with a known pace. A wild smash opens the pile and hides the 8.</p><p><em>Speed</em>You still need a shot after the breakout. A cluster that explodes into a hook is not an open.</p><p><em>Leave</em>Dead: blasting the pile because you were tired of looking at it.</p></div>
+</section><section class="pop" id="twoway" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔀 Two-way shot</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+two+way+shot">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A two-way shot can pot, and if it misses it is still a safety. The miss has to be designed, not hoped.</p><p><em>When</em>Use it when the pot is thin and a clean safety exists on the same line.</p><p><em>Aim</em>Aim the thin edge that still hides the ball if you miss. Speed is the safety. The pot is the bonus.</p><p><em>Speed</em>If the miss leaves them a stand-up shot, it was one-way offense.</p><p><em>Leave</em>Dead: calling it two-way after you missed thin and they can see everything.</p></div>
+</section><section class="pop" id="hook" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🙈 Hook</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+hook+snooker+safety">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A hook means they cannot see a clean face of the ball they must hit. You hid the object ball or you hid the white behind something.</p><p><em>When</em>Use it as the result of a safety, not as a lucky leave.</p><p><em>Aim</em>Distance plus a blocker beats a weak hide they can still kick easy.</p><p><em>Speed</em>After you hook them, look at the kick they have. If the kick is obvious, you only annoyed them.</p><p><em>Leave</em>Dead: a hook that still leaves a one-rail make they know by heart.</p></div>
+</section><section class="pop" id="bih" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🖐️ Ball in hand</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+ball+in+hand">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Ball in hand means you may place the white anywhere legal — usually anywhere behind the head string after a scratch on the break, or anywhere on the table after a foul in many games.</p><p><em>When</em>Know the house. Bar 8-ball often gives kitchen-only after a scratch. APA and other rules differ.</p><p><em>Aim</em>Place the white so the first shot starts a run, not so the first shot looks pretty. The 8’s future angle starts here.</p><p><em>Speed</em>Don’t put the white on a scratch line you will need in two balls.</p><p><em>Leave</em>Dead: dropping the white in the kitchen out of habit when you had the whole table.</p></div>
+</section><section class="pop" id="shape8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🎱 Shape on the 8</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+position+on+the+8+ball">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Every ball you pot near the end of a rack exists to land an easy 8. The 8 is the leave, not a surprise.</p><p><em>When</em>Use it when two or three of yours remain. Ask where the white must sit for the 8, then work backward.</p><p><em>Aim</em>Stop or stun on the last ball of your group. Hero draw onto the 8 is how the 8 stays frozen.</p><p><em>Speed</em>If the 8 is on a rail, shape is rail-walking or a known angle, not center table.</p><p><em>Leave</em>Dead: making your last stripe from downtown and landing on the wrong side of the 8.</p></div>
+</section><section class="pop" id="combo8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔗 Combo on the 8</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+combination+on+the+8">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You hit a legal ball into the 8 so the 8 falls. In 8-ball the 8 going in a called combo is a win in some rooms if you called it. In others you must call the 8’s pocket. Ask.</p><p><em>When</em>The line is first-ball center through 8 through the pocket. If that line is a lie, don’t invent it on the 8.</p><p><em>Aim</em>Firm enough to transfer. Soft combos die and leave the 8 worse.</p><p><em>Speed</em>A foul combo on the 8 is often loss. First contact still has to be legal.</p><p><em>Leave</em>Dead: an uncalled 8 combo that falls while you shrug.</p></div>
+</section><section class="pop" id="dry" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🌵 Dry break</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+dry+break+nothing+goes">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>A dry break opens the rack and pots nothing. They get the table. Your job on a dry break is not to scratch and not to glue the 8 or the 1.</p><p><em>When</em>Use the word after the fact so you look at what you left them. A dry break that spreads and sits the white safe is a good miss.</p><p><em>Aim</em>Don’t chase a ball on the break so hard you scratch. A dry legal break is better than a highlight foul.</p><p><em>Speed</em>Look at the 1 in 9-ball and the 8 in 8-ball after a dry hit. Those two decide whether you actually lost the inning.</p><p><em>Leave</em>Dead: a dry break that also scratches. Now they have ball in hand on an open rack.</p></div>
+</section><section class="pop" id="wing" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🪽 Wing-ball break</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+wing+ball+break">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>You aim the break so a wing ball — the back corner of the rack — flies toward a corner. It is a plan, not a slash.</p><p><em>When</em>8-ball and 9-ball both have wing-ball ideas. Pick the wing, pick the contact on the head ball, keep the white.</p><p><em>Aim</em>If the wing isn’t the plan, don’t claim it after a random ball falls.</p><p><em>Speed</em>Pace is committed but on a line. A wing-ball break that scratches the side is just a scratch.</p><p><em>Leave</em>Dead: hitting ‘hard at the stack’ and calling whichever ball moved a wing ball.</p></div>
+</section><section class="pop" id="dblbank" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🔁 Double bank</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+double+bank+two+rail+bank">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>The object ball hits two rails, then a pocket. Longer than a one-rail bank. More speed throw. More ways to miss long.</p><p><em>When</em>Use it when one rail cannot see a pocket and you still want the object ball to travel, not the white.</p><p><em>Aim</em>Count both diamonds. First rail delivers the second. The second rail aims the hole.</p><p><em>Speed</em>Softer than your instinct. Two-rail banks get long in a hurry.</p><p><em>Leave</em>White must not chase both rails with the object ball.</p><p><em>Dead</em>Dead: one-rail aim on a two-rail path.</p></div>
+</section><section class="pop" id="kick4" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">4️⃣ Four-rail kick</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+four+rail+kick">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Four cushions, then the ball. Rare, but it’s how you unwrap a hook when three rails still miss.</p><p><em>When</em>Walk four rails with your eyes and your finger on the wood. If you lose the count at rail three, you don’t have this shot.</p><p><em>Aim</em>Running medium pace. Four-rail dies when you punch it.</p><p><em>Speed</em>Legal hit is the win. Pocketing off four rails is a story.</p><p><em>Leave</em>Dead: adding a fourth rail because three missed, without a new path.</p></div>
+</section><section class="pop" id="call8" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📣 Call the 8</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+call+shot+8+ball">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>In call-shot 8-ball you must name the 8’s pocket. Slop on the 8 is not a win. Some rooms want the 8 called even when the rest is slop.</p><p><em>When</em>Use it every time the 8 is the ball. Point at the pocket with the cue before you down.</p><p><em>Aim</em>If you switch pockets mid-stroke, you didn’t call that one.</p><p><em>Speed</em>A called 8 that scratches is still a loss in most places.</p><p><em>Leave</em>Dead: the 8 falls in a hole you didn’t name and you start to celebrate.</p></div>
+</section><section class="pop" id="scratchpath" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🚫 Scratch paths</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+scratch+tracks+cue+ball">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Scratch paths are the lines the white takes into a pocket after contact — especially after a thin cut, a rail-first, or a kick.</p><p><em>When</em>Before you shoot, look at the corners the white can see after the hit. If a hole is on that line, change speed, spin, or the shot.</p><p><em>Aim</em>Side pockets eat kicks and 9-ball breaks. Head corners eat draw. Far corners eat follow on long shots.</p><p><em>Speed</em>This is not a pot. This is the map of how you lose the white.</p><p><em>Leave</em>Dead: discovering the scratch after the object ball is already in.</p></div>
+</section><section class="pop" id="english" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">🎯 Center ball</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+center+ball+no+english">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>Center ball means no sidespin and no intended top or bottom except the little you need for stop. The white goes where the line said.</p><p><em>When</em>Use it as the default. English is a reason, not a style.</p><p><em>Aim</em>If you cannot pocket balls center, spin will not save you. Most missed banks were center-ball problems dressed up as diamond problems.</p><p><em>Speed</em>Leave is the tangent you can actually predict.</p><p><em>Leave</em>Dead: a little side ‘for luck’ on a shot that was already aimed.</p></div>
+</section><section class="pop" id="b1hkit" hidden>
+  <header class="ph">
+    <button type="button" class="x" data-close>X</button>
+    <p class="pt">📦 Kitchen after scratch</p>
+    <button type="button" class="del" data-delete>Delete</button>
+    <a class="yt" href="https://www.youtube.com/results?search_query=pool+kitchen+after+scratch">YouTube</a>
+  </header>
+  <div class="fill"><p><em>The shot</em>After many 8-ball scratches you must shoot from behind the head string. Balls in the kitchen may be off limits until the white crosses the line.</p><p><em>When</em>Know whether you may hit a ball in the kitchen. House rules split here.</p><p><em>Aim</em>Place the white on the head string, not buried in the corner unless that angle is the only out.</p><p><em>Speed</em>The first shot should send the white out of the kitchen into the rack’s side of the table.</p><p><em>Leave</em>Dead: aiming a kitchen ball that you were not allowed to hit.</p></div>
+</section>
+<script>
+(function(){
+  const root = document.documentElement;
+  const themeSel = document.getElementById("theme");
+  function systemDark(){ return matchMedia("(prefers-color-scheme: dark)").matches; }
+  function apply(mode){
+    const dark = mode === "dark" || (mode === "auto" && systemDark());
+    root.dataset.theme = dark ? "dark" : "light";
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", dark ? "#0c1612" : "#efe8d8");
+  }
+  const saved = localStorage.getItem("felt-theme") || "dark";
+  themeSel.value = saved;
+  apply(saved);
+  themeSel.addEventListener("change", () => {
+    localStorage.setItem("felt-theme", themeSel.value);
+    apply(themeSel.value);
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if ((localStorage.getItem("felt-theme") || "dark") === "auto") apply("auto");
+  });
+
+  const nav = document.querySelector("nav");
+  const restoreBtn = document.getElementById("restore-btn");
+  const HIDE_KEY = "felt-hidden";
+  function hiddenSet(){
+    try { return new Set(JSON.parse(localStorage.getItem(HIDE_KEY) || "[]")); }
+    catch { return new Set(); }
+  }
+  function saveHidden(set){
+    localStorage.setItem(HIDE_KEY, JSON.stringify([...set]));
+  }
+  function visibleRows(){
+    return [...nav.querySelectorAll(".row")].filter((r) => r.style.display !== "none");
+  }
+  function applyHidden(){
+    const hid = hiddenSet();
+    nav.querySelectorAll(".row").forEach((r) => {
+      r.style.display = hid.has(r.dataset.open) ? "none" : "";
+    });
+    restoreBtn.hidden = hid.size === 0;
+    columns();
+  }
+  function columns(){ /* single scrolling column on the phone */ }
+  applyHidden();
+  restoreBtn.addEventListener("click", () => {
+    localStorage.removeItem(HIDE_KEY);
+    applyHidden();
+  });
+
+  const pops = document.querySelectorAll(".pop");
+  let savedY = 0;
+  function closePops(){
+    pops.forEach((p)=>p.hidden=true);
+  }
+  function close(){
+    closePops();
+    document.body.classList.remove("lock");
+    requestAnimationFrame(() => window.scrollTo(0, savedY));
+  }
+  document.querySelectorAll("[data-open]").forEach((btn)=>{
+    btn.addEventListener("click",()=>{
+      savedY = window.scrollY || window.pageYOffset || 0;
+      closePops();
+      const el = document.getElementById(btn.dataset.open);
+      if(!el) return;
+      el.hidden=false;
+      document.body.classList.add("lock");
+    });
+  });
+  document.querySelectorAll("[data-close]").forEach((btn)=>btn.addEventListener("click",close));
+  document.querySelectorAll("[data-delete]").forEach((btn)=>btn.addEventListener("click",()=>{
+    const pop = btn.closest(".pop");
+    if (!pop) return;
+    const hid = hiddenSet();
+    hid.add(pop.id);
+    saveHidden(hid);
+    close();
+    applyHidden();
+  }));
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") close(); });
+
+  let deferred = null;
+  const btn = document.getElementById("install-btn");
+  const how = document.getElementById("how-install");
+  addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; });
+  btn.addEventListener("click", async () => {
+    if (deferred) { deferred.prompt(); await deferred.userChoice; deferred = null; return; }
+    how.hidden = false;
+    document.body.classList.add("lock");
+  });
+  document.getElementById("how-close").addEventListener("click", () => {
+    how.hidden = true;
+    document.body.classList.remove("lock");
+  });
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
